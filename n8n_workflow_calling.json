@@ -1,0 +1,180 @@
+{
+  "name": "Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "com.twilio.voice.insights.call-summary.complete"
+        ]
+      },
+      "id": "fb431f55-1d11-457e-af97-6d7a0daea5ff",
+      "name": "Twilio Trigger",
+      "type": "n8n-nodes-base.twilioTrigger",
+      "typeVersion": 1,
+      "position": [
+        128,
+        160
+      ],
+      "webhookId": "{{TWILIO_WEBHOOK_ID}}",
+      "credentials": {
+        "twilioApi": {
+          "id": "{{TWILIO_CREDENTIAL_ID}}",
+          "name": "{{TWILIO_ACCOUNT_NAME}}"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const caller = $json[\"From\"];\nif (caller && caller.startsWith(\"+1\")) {\n  return [{json:{status:\"partner\", caller}}];\n} else {\n  return [{json:{status:\"unknown\", caller}}];\n}\n"
+      },
+      "id": "a22af228-2c1c-4c9d-bfef-37a8233155ef",
+      "name": "Caller Lookup",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        336,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": "{{GOOGLE_SHEET_ID}}",
+        "sheetName": "{{GOOGLE_SHEET_NAME}}",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "id": "a6310f38-cfa9-4010-bd1a-23da79c6bead",
+      "name": "Lookup Contacts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        528,
+        160
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_ACCOUNT_NAME}}"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "{{VECTOR_DB_URL}}",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "c31da302-a6ba-4fb5-9e6a-398f78dfc1fe",
+      "name": "Vector Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        528,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "options": {},
+        "requestOptions": {}
+      },
+      "id": "ecd9d96d-7b16-44f8-a6c8-52b549bb424e",
+      "name": "AI Brain",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        736,
+        368
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "{{OPENAI_CREDENTIAL_ID}}",
+          "name": "{{OPENAI_ACCOUNT_NAME}}"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": "primary",
+        "start": "={{$json[\"details\"][\"date\"]}}",
+        "end": "={{$json[\"details\"][\"end\"] || $json[\"details\"][\"date\"]}}",
+        "additionalFields": {}
+      },
+      "id": "294a5f88-160d-4d7a-81f1-d3ca16581ac4",
+      "name": "Google Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        48
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "{{GOOGLE_CALENDAR_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_CALENDAR_ACCOUNT_NAME}}"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "subject": "Weekly Report",
+        "message": "Hello",
+        "additionalFields": {}
+      },
+      "id": "0bd19e11-42c9-4929-adf3-f79bf576649f",
+      "name": "Send Report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        224
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "{{GMAIL_CREDENTIAL_ID}}",
+          "name": "{{GMAIL_ACCOUNT_NAME}}"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "general",
+        "text": "Task processed: {{$json.action}}",
+        "otherOptions": {},
+        "attachments": []
+      },
+      "id": "d05d72a3-1a64-470b-98d5-2c416300bcb0",
+      "name": "Slack Notify",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        416
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "{{SLACK_CREDENTIAL_ID}}",
+          "name": "{{SLACK_ACCOUNT_NAME}}"
+        }
+      }
+    }
+  ],
+  "connections": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "{{WORKFLOW_VERSION_ID}}",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "{{INSTANCE_ID}}"
+  },
+  "id": "{{WORKFLOW_ID}}",
+  "tags": []
+}
